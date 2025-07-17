@@ -1,8 +1,8 @@
 terraform {
   backend "azurerm" {
-    resource_group_name   = "swapnilpipeline"
-    storage_account_name  = "swapnilstr"         # Must be globally unique
-    container_name        = "tfstatefile"
+    resource_group_name   = "rgamak"
+    storage_account_name  = "amakstg"         # Must be globally unique
+    container_name        = "amakcontainer"
     key                   = "terraform.tfstate"
   }
   required_providers {
