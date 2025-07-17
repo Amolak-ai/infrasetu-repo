@@ -1,0 +1,66 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+ branches:
+   include:
+     - main   
+# ye niche vala hissa pr ke time me pipeline trigger nahi karega        
+pr:
+ branches:
+   exclude:
+     - main 
+
+      
+
+pool:
+ name: navin-agent
+
+stages:
+  - stage: initial  
+    displayName: initial stage
+    jobs:
+      - job: initialstage
+        displayName: initial stage
+        steps:
+        - task: TerraformInstaller@1
+          displayName: terraform installation
+          inputs:
+            terraformVersion: 'latest'
+        - task: TerraformTask@5
+          displayName: init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'navin-sc'
+            backendAzureRmResourceGroupName: 'swapnilpipeline'
+            backendAzureRmStorageAccountName: 'swapnilstr'
+            backendAzureRmContainerName: 'tfstatefile'
+            backendAzureRmKey: 'terraform.tfstate'
+        - task: TerraformTask@5
+          displayName: fmt
+          inputs:
+            provider: 'azurerm'
+            command: 'custom'
+            outputTo: 'console'
+            customCommand: 'fmt'
+            environmentServiceNameAzureRM: 'navin-sc'
+        - task: TerraformTask@5
+          displayName: validate
+          inputs:
+            provider: 'azurerm'
+            command: 'validate'
+        - task: TerraformTask@5
+          displayName: plan
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            environmentServiceNameAzureRM: 'navin-sc'
+        - task: TerraformTask@5
+          displayName: apply
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            environmentServiceNameAzureRM: 'navin-sc'

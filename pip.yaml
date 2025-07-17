@@ -1,0 +1,47 @@
+trigger:
+- main
+
+pool:
+  name: Default
+
+variables:
+  TF_VERSION: '1.6.0'
+
+steps:
+# ✅ Step 1: Install Terraform
+- task: TerraformInstaller@1
+  displayName: 'Install Terraform'
+  inputs:
+    terraformVersion: '$(TF_VERSION)'
+
+# ✅ Step 2: Checkout code
+- checkout: self
+
+# ✅ Step 3: Terraform Init + Plan + Apply using SP auth
+- task: AzureCLI@2
+  displayName: 'Terraform Init, Plan & Apply'
+  inputs:
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      echo "✅ Terraform version:"
+      terraform version
+
+      echo "🔧 Running terraform init..."
+      terraform init \
+        -backend-config="resource_group_name=swapnilpipeline" \
+        -backend-config="storage_account_name=swapnilstr" \
+        -backend-config="container_name=tfstatefile" \
+        -backend-config="key=terraform.tfstate"
+
+      echo "📋 Running terraform plan..."
+      terraform plan -out=tfplan
+
+      echo "🚀 Running terraform apply..."
+      terraform apply -auto-approve tfplan
+  workingDirectory: '$(System.DefaultWorkingDirectory)'
+  env:
+    ARM_CLIENT_ID: $(servicePrincipalId)
+    ARM_CLIENT_SECRET: $(servicePrincipalKey)
+    ARM_SUBSCRIPTION_ID: $(subscriptionId)
+    ARM_TENANT_ID: $(tenantId)

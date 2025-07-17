@@ -1,0 +1,55 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - main
+pr:
+  branches:
+    exclude:
+      - main
+
+
+pool:
+  name: swappract
+
+stages:
+  - stage: deploy
+    displayName: terraform deploy
+    jobs:
+      - job: deploy
+        displayName: deploy
+        steps:
+        - task: TerraformInstaller@1
+          inputs:
+            terraformVersion: 'latest'
+
+        - task: TerraformTask@5
+          displayName: terraform init
+          inputs:
+            provider: 'azurerm'
+            command: 'init'
+            backendServiceArm: 'swapnil-sc'
+            backendAzureRmResourceGroupName: 'swapnilpipeline'
+            backendAzureRmStorageAccountName: 'swapnilstr'
+            backendAzureRmContainerName: 'tfstatefile'
+            backendAzureRmKey: 'terraform.tfstate'
+
+        - task: TerraformTask@5
+          displayName: terraform plan
+          inputs:
+            provider: 'azurerm'
+            command: 'plan'
+            environmentServiceNameAzureRM: 'swapnil-sc'
+
+        - task: TerraformTask@5
+          displayName: terraform apply
+          condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+          inputs:
+            provider: 'azurerm'
+            command: 'apply'
+            environmentServiceNameAzureRM: 'swapnil-sc'
+
