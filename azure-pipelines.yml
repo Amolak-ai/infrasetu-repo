@@ -16,7 +16,7 @@ pr:
       
 
 pool:
- name: navin-agent
+ name: amak-agent
 
 stages:
   - stage: initial  
@@ -34,10 +34,10 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'init'
-            backendServiceArm: 'navin-sc'
-            backendAzureRmResourceGroupName: 'swapnilpipeline'
-            backendAzureRmStorageAccountName: 'swapnilstr'
-            backendAzureRmContainerName: 'tfstatefile'
+            backendServiceArm: 'amak-sc'
+            backendAzureRmResourceGroupName: 'rgamak'
+            backendAzureRmStorageAccountName: 'amakstg'
+            backendAzureRmContainerName: 'amakcontainer'
             backendAzureRmKey: 'terraform.tfstate'
         - task: TerraformTask@5
           displayName: fmt
@@ -46,7 +46,7 @@ stages:
             command: 'custom'
             outputTo: 'console'
             customCommand: 'fmt'
-            environmentServiceNameAzureRM: 'navin-sc'
+            environmentServiceNameAzureRM: 'amak-sc'
         - task: TerraformTask@5
           displayName: validate
           inputs:
@@ -57,10 +57,10 @@ stages:
           inputs:
             provider: 'azurerm'
             command: 'plan'
-            environmentServiceNameAzureRM: 'navin-sc'
+            environmentServiceNameAzureRM: 'amak-sc'
         - task: TerraformTask@5
           displayName: apply
           inputs:
             provider: 'azurerm'
             command: 'apply'
-            environmentServiceNameAzureRM: 'navin-sc'
+            environmentServiceNameAzureRM: 'amak-sc'
